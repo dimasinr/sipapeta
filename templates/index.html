@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pakar Diagnosa - CNN-KNN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Sistem Pakar Diagnosa Penyakit Tanaman</h1>
+        <p class="subtitle">Berbasis Deep Learning (Hybrid CNN-KNN)</p>
+
+        <form action="/diagnosa" method="POST" enctype="multipart/form-data" id="upload-form">
+            <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                <h3>Upload Citra Daun</h3>
+                <p>Klik atau Drag & Drop gambar ke sini</p>
+                <input type="file" name="image" id="file-input" accept="image/*" required
+                    onchange="handleFileSelect(event)">
+                <p id="file-name" style="margin-top: 10px; color: var(--success); display: none;"></p>
+            </div>
+
+            <button type="submit" class="btn" id="submit-btn" style="display: none;">Dapatkan Diagnosa</button>
+        </form>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileNameDisplay = document.getElementById('file-name');
+        const submitBtn = document.getElementById('submit-btn');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect({ target: fileInput });
+            }
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = `File terpilih: ${file.name}`;
+                fileNameDisplay.style.display = 'block';
+                submitBtn.style.display = 'inline-block';
+            }
+        }
+    </script>
+</body>
+
+</html>

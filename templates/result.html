@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Diagnosa - CNN-KNN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="result-container" style="margin: 30px;">
+        <div class="header-action">
+            <a href="/" class="btn back-btn"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+            <div class="title-wrapper">
+                <h1>Hasil Analisis</h1>
+                <p class="subtitle">Diagnosa Penyakit Tanaman dengan Model Hybrid CNN-KNN</p>
+            </div>
+        </div>
+        
+        <div class="result-grid">
+            <div class="image-column">
+                <img src="{{ image_path }}" alt="Citra Daun yang Diunggah" class="uploaded-image">
+                <div class="confidence-badge">
+                    <i class="fa-solid fa-check-circle"></i> Kepercayaan: {{ confidence }}
+                </div>
+            </div>
+            
+            <div class="details-column">
+                <div class="detail-item">
+                    <span class="detail-label">Nama Penyakit:</span>
+                    <span class="detail-value highlight">{{ nama_penyakit }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Penjelasan:</span>
+                    <span class="detail-value">{{ penjelasan }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Penyebab:</span>
+                    <span class="detail-value">{{ penyebab }}</span>
+                </div>
+                
+                <div class="detail-item">
+                    <span class="detail-label">Solusi Penanganan:</span>
+                    <span class="detail-value">{{ solusi }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
