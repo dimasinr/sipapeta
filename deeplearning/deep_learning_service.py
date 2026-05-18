@@ -1,183 +1,126 @@
+# =========================================================
+# FINAL HYBRID CNN-KNN PREDICTION SERVICE
+# BASELINE CNN vs MobileNetV2 + KNN
+# TANPA PCA (LOKAL VERSION - WINDOWS)
+# =========================================================
+
+# =========================================================
+# IMPORT LIBRARY
+# =========================================================
+
 import os
 import numpy as np
+import tensorflow as tf
 import joblib
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.models import Model
-from sklearn.decomposition import PCA
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import GridSearchCV
+
+# pyrefly: ignore [missing-import]
+from tensorflow.keras.preprocessing import image
+# pyrefly: ignore [missing-import]
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-# ======================
-# CONFIG
-# ======================
-IMG_SIZE = 224
-BATCH_SIZE = 32
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATASET_PATH = os.path.join(BASE_DIR, "dataset/train/")
-MODEL_DIR = os.path.join(BASE_DIR, "model/")
 
-# Load model secara global agar tidak di-load ulang setiap kali prediksi
-_base_model = None
-_model = None
-_pca = None
-_knn = None
-_classes = None
+# =========================================================
+# DATASET & MODEL PATHS (LOKAL)
+# =========================================================
 
-def get_feature_extractor():
-    global _base_model, _model
-    if _model is None:
-        _base_model = MobileNetV2(weights='imagenet', include_top=False, pooling='avg', input_shape=(224, 224, 3))
-        _model = Model(inputs=_base_model.input, outputs=_base_model.output)
-    return _model
+script_dir = os.path.dirname(os.path.abspath(__file__))
+train_path = os.path.join(script_dir, "Chilli Plant Diseases Dataset", "train")
+valid_path = os.path.join(script_dir, "Chilli Plant Diseases Dataset", "valid")
+test_path = os.path.join(script_dir, "Chilli Plant Diseases Dataset", "test")
 
-def get_best_k(features_pca, labels):
-    # ======================
-    # GRID SEARCH KNN
-    # ======================
-    print("Melakukan Grid Search untuk KNN...")
+# Tentukan folder model di root proyek
+root_dir = os.path.dirname(script_dir)
+model_dir = os.path.join(root_dir, "model")
+if not os.path.exists(model_dir):
+    os.makedirs(model_dir, exist_ok=True)
 
-    param_grid = {
-        'n_neighbors': [3, 5],
-        'weights': ['uniform', 'distance'],
-        'metric': ['euclidean', 'manhattan']
-    }
+save_dir = model_dir
 
-    grid = GridSearchCV(
-        KNeighborsClassifier(),
-        param_grid,
-        cv=3,              
-        verbose=1,
-        n_jobs=-1
-    )
+# Definisikan path model hybrid
+FEATURE_EXTRACTOR_PATH = os.path.join(model_dir, "mobilenetv2_feature_extractor.h5")
+KNN_MODEL_PATH = os.path.join(model_dir, "mobilenetv2_hybrid_knn.pkl")
 
-    grid.fit(features_pca, labels)
+# =========================================================
+# LAZY LOAD GLOBAL MODELS FOR PREDICTION
+# =========================================================
 
-    print("Best Parameters:", grid.best_params_)
+_feature_extractor = None
+_knn_model = None
 
-    knn = grid.best_estimator_
-    return knn
+# Class names mapping (obtained from directory list)
+RAW_CLASSES = [
+    "Chilli __Whitefly",
+    "Chilli __Yellowish",
+    "Chilli__Anthracnos",
+    "Chilli__Leaf_Curl_Virus",
+    "Chilli__Leaf_Spot",
+    "Chilli__Veinal_Mottle_Virus",
+    "Chilli___healthy"
+]
 
-def train_model():
-    """Melatih PCA dan KNN menggunakan fitur yang diekstrak dari MobileNetV2."""
-    print("Memulai proses training...")
-    os.makedirs(MODEL_DIR, exist_ok=True)
-    
-    # datagen = ImageDataGenerator(rescale=1./255)
-    datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
-
-    generator = datagen.flow_from_directory(
-        DATASET_PATH,
-        target_size=(IMG_SIZE, IMG_SIZE),
-        batch_size=BATCH_SIZE,
-        class_mode='categorical',
-        shuffle=False
-    )
-    
-    model = get_feature_extractor()
-    
-    print("Mengekstraksi fitur...")
-    features = model.predict(generator, verbose=1)
-    labels = generator.classes
-    
-    print("Feature shape:", features.shape)
-    
-    print("Melakukan PCA...")
-    # Menghindari error jika jumlah sampel kurang dari 100
-    n_components = min(100, features.shape[1])
-    pca = PCA(n_components=n_components, random_state=42)
-    features_pca = pca.fit_transform(features)
-    
-    print("\n[1] Melatih Base KNN (Default n_neighbors=5)...")
-    base_knn = KNeighborsClassifier(n_neighbors=5)
-    base_knn.fit(features_pca, labels)
-    base_predictions = base_knn.predict(features_pca)
-    base_acc = accuracy_score(labels, base_predictions)
-    
-    print("\n[2] Memulai Evaluasi dengan Grid Search KNN...")
-    best_knn = get_best_k(features_pca, labels) # memanggil fungsi yang sudah Anda buat
-    best_predictions = best_knn.predict(features_pca)
-    best_acc = accuracy_score(labels, best_predictions)
-    
-    class_names = list(generator.class_indices.keys())
-    
-    print("\n==============================================")
-    print("HASIL PERBANDINGAN MODEL (Pada Data Training)")
-    print("==============================================")
-    
-    print("\n--- 1. BASE KNN ---")
-    print(f"Akurasi  : {base_acc*100:.2f}%")
-    print("\nConfusion Matrix:")
-    print(confusion_matrix(labels, base_predictions))
-    print("\nClassification Report:")
-    print(classification_report(labels, base_predictions, target_names=class_names))
-    
-    print("\n--- 2. GRID SEARCH KNN ---")
-    print(f"Akurasi  : {best_acc*100:.2f}%")
-    print("Parameter: ", best_knn.get_params())
-    print("\nConfusion Matrix:")
-    print(confusion_matrix(labels, best_predictions))
-    print("\nClassification Report:")
-    print(classification_report(labels, best_predictions, target_names=class_names))
-    
-    print("\nMenyimpan model terbaik hasil Grid Search...")
-    joblib.dump(pca, os.path.join(MODEL_DIR, "pca.pkl"))
-    joblib.dump(best_knn, os.path.join(MODEL_DIR, "knn.pkl"))
-    
-    # Simpan mapping label (id -> nama kelas)
-    class_mapping = {v: k for k, v in generator.class_indices.items()}
-    joblib.dump(class_mapping, os.path.join(MODEL_DIR, "classes.pkl"))
-    
-    print("Model berhasil disimpan di folder 'model/'!")
-
-def load_models():
-    """Memuat PCA, KNN, dan label kelas."""
-    global _pca, _knn, _classes
-    if _pca is None or _knn is None or _classes is None:
-        try:
-            _pca = joblib.load(os.path.join(MODEL_DIR, "pca.pkl"))
-            _knn = joblib.load(os.path.join(MODEL_DIR, "knn.pkl"))
-            _classes = joblib.load(os.path.join(MODEL_DIR, "classes.pkl"))
-        except FileNotFoundError:
-            print("Error: Model belum dilatih. Jalankan train_model() terlebih dahulu.")
-            return False
-    return True
+# Mapping to match Flask app INFO_PENYAKIT dictionary keys
+CLASS_MAPPING = {
+    "Chilli __Whitefly": "whitefly",
+    "Chilli __Yellowish": "yellowish",
+    "Chilli__Anthracnos": "anthracnose",
+    "Chilli__Leaf_Curl_Virus": "leaf curl",
+    "Chilli__Leaf_Spot": "leaf spot",
+    "Chilli__Veinal_Mottle_Virus": "veinal mottle virus",
+    "Chilli___healthy": "healthy"
+}
 
 def predict(image_path):
     """
-    Memprediksi kelas dari gambar yang diberikan menggunakan model Hybrid CNN-KNN.
+    Fungsi prediksi untuk mendeteksi penyakit tanaman cabai.
+    Digunakan oleh app.py untuk melakukan diagnosa secara real-time.
     """
-    if not load_models():
-        return None, 0.0
+    global _feature_extractor, _knn_model
+    
+    # Load model jika belum terload di memory (Lazy Loading)
+    if _feature_extractor is None:
+        local_extractor_path = os.path.join(model_dir, "mobilenetv2_feature_extractor.h5")
+        if not os.path.exists(local_extractor_path):
+            # Fallback ke folder script jika folder model tidak punya file tersebut
+            local_extractor_path = os.path.join(script_dir, "mobilenetv2_feature_extractor.h5")
+            if not os.path.exists(local_extractor_path):
+                print(f"[ERROR] File feature extractor tidak ditemukan di: {local_extractor_path}")
+                return None, 0.0
+        print(f"[INFO] Memuat Model Feature Extractor dari {local_extractor_path}...")
+        _feature_extractor = tf.keras.models.load_model(local_extractor_path, compile=False)
         
-    model = get_feature_extractor()
-    
-    # Load and preprocess image
-
-    img = load_img(image_path, target_size=(IMG_SIZE, IMG_SIZE))
-    img_array = img_to_array(img)
-    # img_array = img_array / 255.0  # Rescale ke 0-1
-    img_array = preprocess_input(img_array)
-    img_array = np.expand_dims(img_array, axis=0)  # Tambahkan dimensi batch
-    
-    # Extract features
-    features = model.predict(img_array, verbose=0)
-    
-    # PCA transform
-    features_pca = _pca.transform(features)
-    
-    # Predict with KNN
-    class_idx = _knn.predict(features_pca)[0]
-    
-    # Get probabilities
-    probas = _knn.predict_proba(features_pca)[0]
-    confidence = float(np.max(probas) * 100) # Persentase confidence
-    
-    class_name = _classes[class_idx]
-    
-    return class_name, confidence
-
-if __name__ == '__main__':
-    train_model()
+    if _knn_model is None:
+        local_knn_path = os.path.join(model_dir, "mobilenetv2_hybrid_knn.pkl")
+        if not os.path.exists(local_knn_path):
+            # Fallback ke folder script jika folder model tidak punya file tersebut
+            local_knn_path = os.path.join(script_dir, "mobilenetv2_hybrid_knn.pkl")
+            if not os.path.exists(local_knn_path):
+                print(f"[ERROR] File KNN Classifier tidak ditemukan di: {local_knn_path}")
+                return None, 0.0
+        print(f"[INFO] Memuat Model KNN Classifier dari {local_knn_path}...")
+        _knn_model = joblib.load(local_knn_path)
+        
+    try:
+        # Preprocessing Gambar
+        img = image.load_img(image_path, target_size=(224, 224))
+        img_array = image.img_to_array(img)
+        img_array = np.expand_dims(img_array, axis=0)
+        img_array = preprocess_input(img_array)
+        
+        # Ekstraksi Fitur menggunakan CNN
+        features = _feature_extractor.predict(img_array, verbose=0)
+        
+        # Prediksi menggunakan KNN Pipeline (Scaler + KNN)
+        pred_idx = _knn_model.predict(features)[0]
+        
+        # Hitung tingkat kepercayaan (confidence) dari probabilitas KNN
+        pred_proba = _knn_model.predict_proba(features)[0]
+        confidence = float(pred_proba[pred_idx] * 100.0)
+        
+        raw_pred_class = RAW_CLASSES[pred_idx]
+        clean_pred_class = CLASS_MAPPING.get(raw_pred_class, raw_pred_class)
+        
+        print(f"[DIAGNOSA] Hasil: {raw_pred_class} -> {clean_pred_class} ({confidence:.2f}%)")
+        return clean_pred_class, confidence
+        
+    except Exception as e:
+        print(f"[ERROR] Gagal melakukan diagnosa: {e}")
+        return None, 0.0

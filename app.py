@@ -3,8 +3,6 @@ from flask import Flask, render_template, request, url_for
 from deeplearning.deep_learning_service import predict
 
 app = Flask(__name__)
-# Ganti folder uploads ke dalam static agar bisa diakses langsung via URL
-os.makedirs(os.path.join('static', 'uploads'), exist_ok=True)
 
 # Data Penyakit untuk Mapping Hasil Model
 INFO_PENYAKIT = {
@@ -37,6 +35,18 @@ INFO_PENYAKIT = {
         "penjelasan": "Tanaman terlihat hijau, segar, dan tidak menunjukkan gejala penyakit atau hama.",
         "penyebab": "Perawatan dan kondisi lingkungan yang sudah sangat baik.",
         "solusi": "Pertahankan rutinitas penyiraman, pemupukan, dan pemantauan tanaman yang ada saat ini."
+    },
+    "anthracnose": {
+        "nama": "Antraknosa (Anthracnose / Patek)",
+        "penjelasan": "Penyakit yang ditandai dengan munculnya bercak melingkar basah kehitaman pada buah cabai, lambat laun mengering, mengerut, dan menyebabkan buah membusuk serta gugur.",
+        "penyebab": "Infeksi jamur Colletotrichum capsici yang berkembang biak dengan cepat pada kondisi kelembaban tinggi dan suhu hangat.",
+        "solusi": "Cabut dan musnahkan buah cabai yang terinfeksi. Hindari penyiraman langsung pada buah/daun (gunakan irigasi tetes), dan semprotkan fungisida berbahan aktif mankozeb atau tembaga hidroksida."
+    },
+    "veinal mottle virus": {
+        "nama": "Virus Mottle Pembuluh Daun (Veinal Mottle Virus)",
+        "penjelasan": "Gejala berupa warna belang hijau tua dan hijau muda (mosaik) di sepanjang pembuluh vena daun, terkadang disertai daun yang sedikit mengerut atau menyempit.",
+        "penyebab": "Infeksi Chilli Veinal Mottle Virus (ChiVMV) yang ditularkan oleh hama kutu daun (Aphis gossypii) sebagai vektor penyebar.",
+        "solusi": "Kendalikan populasi hama kutu daun dengan insektisida nabati atau kimia. Segera cabut dan bakar tanaman yang menunjukkan gejala virus agar tidak menular ke tanaman sehat lainnya."
     }
 }
 
