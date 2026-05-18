@@ -1,0 +1,18 @@
+# ==============================================================================
+# REQUIREMENTS FOR SIPAPETA WEB APP & HYBRID CNN-KNN PREDICTION
+# ==============================================================================
+
+# Web Application Framework
+Flask>=2.0.0
+
+# Deep Learning Library for Feature Extraction (MobileNetV2)
+tensorflow>=2.8.0
+
+# Machine Learning Library for KNN Classification & StandardScaler Pipeline
+scikit-learn>=1.0.0
+
+# Serialization & Deserialization of ML/DL Pipelines
+joblib>=1.1.0
+
+# Multi-dimensional Array Processing
+numpy>=1.20.0
