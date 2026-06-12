@@ -47,6 +47,12 @@ INFO_PENYAKIT = {
         "penjelasan": "Gejala berupa warna belang hijau tua dan hijau muda (mosaik) di sepanjang pembuluh vena daun, terkadang disertai daun yang sedikit mengerut atau menyempit.",
         "penyebab": "Infeksi Chilli Veinal Mottle Virus (ChiVMV) yang ditularkan oleh hama kutu daun (Aphis gossypii) sebagai vektor penyebar.",
         "solusi": "Kendalikan populasi hama kutu daun dengan insektisida nabati atau kimia. Segera cabut dan bakar tanaman yang menunjukkan gejala virus agar tidak menular ke tanaman sehat lainnya."
+    },
+    "non-chilli": {
+        "nama": "Bukan Tanaman Cabai (Non-Chilli)",
+        "penjelasan": "Gambar yang diupload bukan merupakan tanaman cabai.",
+        "penyebab": "Gambar bukan tanaman cabai",
+        "solusi": "Upload gambar tanaman cabai"
     }
 }
 

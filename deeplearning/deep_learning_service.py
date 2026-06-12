@@ -35,9 +35,10 @@ if not os.path.exists(model_dir):
 
 save_dir = model_dir
 
-# Definisikan path model hybrid
+# Definisikan path model hybrid & baseline
 FEATURE_EXTRACTOR_PATH = os.path.join(model_dir, "mobilenetv2_feature_extractor.h5")
-KNN_MODEL_PATH = os.path.join(model_dir, "mobilenetv2_hybrid_knn.pkl")
+KNN_MODEL_PATH = os.path.join(model_dir, "hybrid_cnn_knn.pkl")
+MOBILENET_BEST_PATH = os.path.join(model_dir, "mobilenetv2_best.h5")
 
 # =========================================================
 # LAZY LOAD GLOBAL MODELS FOR PREDICTION
@@ -45,27 +46,30 @@ KNN_MODEL_PATH = os.path.join(model_dir, "mobilenetv2_hybrid_knn.pkl")
 
 _feature_extractor = None
 _knn_model = None
+_cnn_best_model = None
 
 # Class names mapping (obtained from directory list)
 RAW_CLASSES = [
-    "Chilli __Whitefly",
-    "Chilli __Yellowish",
-    "Chilli__Anthracnos",
-    "Chilli__Leaf_Curl_Virus",
-    "Chilli__Leaf_Spot",
-    "Chilli__Veinal_Mottle_Virus",
-    "Chilli___healthy"
+    'Chilli Anthracnose',
+    'Chilli Healthy',
+    'Chilli Leaf Curl Virus',
+    'Chilli Leaf Spot',
+    'Chilli Veinal Mottle Virus',
+    'Chilli Whitefly',
+    'Chilli Yellowish',
+    'Non-Chilli'
 ]
 
 # Mapping to match Flask app INFO_PENYAKIT dictionary keys
 CLASS_MAPPING = {
-    "Chilli __Whitefly": "whitefly",
-    "Chilli __Yellowish": "yellowish",
-    "Chilli__Anthracnos": "anthracnose",
-    "Chilli__Leaf_Curl_Virus": "leaf curl",
-    "Chilli__Leaf_Spot": "leaf spot",
-    "Chilli__Veinal_Mottle_Virus": "veinal mottle virus",
-    "Chilli___healthy": "healthy"
+    'Chilli Anthracnose': 'anthracnose ( Patek )',
+    'Chilli Healthy': 'healthy ( Sehat )',
+    'Chilli Leaf Curl Virus': 'leaf curl',
+    'Chilli Leaf Spot': 'leaf spot',
+    'Chilli Veinal Mottle Virus': 'veinal mottle virus',
+    'Chilli Whitefly': 'whitefly',
+    'Chilli Yellowish': 'yellowish',
+    'Non-Chilli': 'non-chilli'
 }
 
 def predict(image_path):
@@ -88,10 +92,10 @@ def predict(image_path):
         _feature_extractor = tf.keras.models.load_model(local_extractor_path, compile=False)
         
     if _knn_model is None:
-        local_knn_path = os.path.join(model_dir, "mobilenetv2_hybrid_knn.pkl")
+        local_knn_path = os.path.join(model_dir, "hybrid_cnn_knn.pkl")
         if not os.path.exists(local_knn_path):
             # Fallback ke folder script jika folder model tidak punya file tersebut
-            local_knn_path = os.path.join(script_dir, "mobilenetv2_hybrid_knn.pkl")
+            local_knn_path = os.path.join(script_dir, "hybrid_cnn_knn.pkl")
             if not os.path.exists(local_knn_path):
                 print(f"[ERROR] File KNN Classifier tidak ditemukan di: {local_knn_path}")
                 return None, 0.0
