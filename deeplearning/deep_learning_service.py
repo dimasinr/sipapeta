@@ -64,12 +64,12 @@ RAW_CLASSES = [
 CLASS_MAPPING = {
     'Chilli Anthracnose': 'anthracnose ( Patek )',
     'Chilli Healthy': 'healthy ( Sehat )',
-    'Chilli Leaf Curl Virus': 'leaf curl',
-    'Chilli Leaf Spot': 'leaf spot',
-    'Chilli Veinal Mottle Virus': 'veinal mottle virus',
-    'Chilli Whitefly': 'whitefly',
-    'Chilli Yellowish': 'yellowish',
-    'Non-Chilli': 'non-chilli'
+    'Chilli Leaf Curl Virus': 'leaf curl ( Keriting )',
+    'Chilli Leaf Spot': 'leaf spot ( Bercak )',
+    'Chilli Veinal Mottle Virus': 'veinal mottle virus ( Virus )',
+    'Chilli Whitefly': 'whitefly ( Kutu Kebul )',
+    'Chilli Yellowish': 'yellowish ( Menguning )',
+    'Non-Chilli': 'non-chilli ( Bukan Tanaman Cabai )'
 }
 
 def predict(image_path):
