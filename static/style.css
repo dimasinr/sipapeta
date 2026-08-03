@@ -241,3 +241,61 @@ input[type="file"] {
     transform: translateY(0);
   }
 }
+
+/* Confidence Chart styles */
+.confidence-chart-section {
+  background: rgba(15, 23, 42, 0.4);
+  padding: 2rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 2rem;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.chart-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: var(--text-main);
+  text-align: left;
+}
+
+.chart-row {
+  margin-bottom: 1.2rem;
+}
+
+.chart-row:last-child {
+  margin-bottom: 0;
+}
+
+.chart-label-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.class-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.class-value {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.bar-container {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  height: 0.75rem;
+  width: 100%;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+  transition: width 1s ease-out;
+}

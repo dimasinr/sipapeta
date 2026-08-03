@@ -48,6 +48,22 @@
                 </div>
             </div>
         </div>
+
+        <!-- Section Bar Chart Tingkat Kepercayaan Semua Kelas -->
+        <div class="confidence-chart-section">
+            <h2 class="chart-title"><i class="fa-solid fa-chart-bar"></i> Tingkat Kepercayaan Semua Kelas Penyakit</h2>
+            {% for pred in predictions %}
+            <div class="chart-row">
+                <div class="chart-label-row">
+                    <span class="class-name">{{ pred.class_name }}</span>
+                    <span class="class-value">{{ "%.2f"|format(pred.probability) }}%</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: {{ pred.probability }}%;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </body>
 </html>
